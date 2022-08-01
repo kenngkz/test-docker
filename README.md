@@ -3,6 +3,7 @@ This is a demonstration and test for how image/container dependency might work. 
 
 To run, enter `sh run.sh` in the terminal.
 
+# Documentation
 ## base.py
 Contains a function called base_func, which returns a list repeating the given argument 10 times. (eg. base_func("x") > ["x", "x", "x", "x", "x", "x", "x", "x", "x", "x"])
 
@@ -17,8 +18,6 @@ This script should be used to build all images and run both containers.
 
 On the first line, it builds the base image (the common dependency) and names it test-base. Then on the 2nd line, it builds the images for the 2 containers and runs it according to the docker-compose.yml specifications.
 
-We can change the install/run process to first build the relevant images and cleanup the test-base image (via a install file), then seperately run the containers by running a 2nd command (docker-compose...).
-
 ## docker-compose.yml
 Specifies the 2 services and containers to run as well as the ports to expose.
 
@@ -30,3 +29,9 @@ This Dockerfile builds the image for the first container. Building from test-ima
 
 ## Dockerfile > cont2
 This Dockerfile builds the image for the second container. Building from test-image, it copies the cont2 files into the image and installs the requirements, then finally serves the API in c2code.py using uvicorn to port 8002.
+
+# Downsides
+1. Intermediate image test-base is not actively used by any container, but it is still taking up memory.
+    - We can change the install/run process to first build the relevant images and cleanup the test-base image (via a install file), then seperately run the containers by running a 2nd command (docker-compose...). This solves the above issue, but 1 extra step to deploy from scratch.
+2. Many Dockerfiles + docker-compose.yml + run.sh (+ install.py if implementing above solution)
+    
