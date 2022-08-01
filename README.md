@@ -3,6 +3,7 @@ This is a demonstration and test for how image/container dependency might work. 
 
 To run, enter `sh run.sh` in the terminal.
 
+---
 # Documentation
 ## base.py
 Contains a function called base_func, which returns a list repeating the given argument 10 times. (eg. base_func("x") > ["x", "x", "x", "x", "x", "x", "x", "x", "x", "x"])
@@ -30,8 +31,19 @@ This Dockerfile builds the image for the first container. Building from test-ima
 ## Dockerfile > cont2
 This Dockerfile builds the image for the second container. Building from test-image, it copies the cont2 files into the image and installs the requirements, then finally serves the API in c2code.py using uvicorn to port 8002.
 
+---
+# Testing
+To test that both containers are working as expected, first run `curl 0.0.0.0:8001`. You should get a json reply {"message":["hi", "hi", "hi", "hi", "hi", "hi", "hi", "hi", "hi", "hi"]}. This means container_1 is working. Next, run `curl 0.0.0.0:8002`. You should get a json reply {"message":[9, 9, 9, 9, 9, 9, 9, 9, 9, 9]}. This means container_2 is working.
+
+---
+# Upsides
+No need to maintain/edit multiple versions of base.py
+
 # Downsides
-1. Intermediate image test-base is not actively used by any container, but it is still taking up memory.
-    - We can change the install/run process to first build the relevant images and cleanup the test-base image (via a install file), then seperately run the containers by running a 2nd command (docker-compose...). This solves the above issue, but 1 extra step to deploy from scratch.
-2. Many Dockerfiles + docker-compose.yml + run.sh (+ install.py if implementing above solution)
-    
+Intermediate image test-base is not actively used by any container, but it is still taking up memory.
+  - We can change the install/run process to first build the relevant images and cleanup the test-base image (via a install file), then seperately run the containers by running a 2nd command (docker-compose...). This solves the above issue, but 1 extra step to deploy from scratch.
+  - We can upload test-base to a docker image repository (like docker hub). Currently not sure about implementation + potential authentication/connection issues.
+
+# Notes
+We can run any build processes required by all containers while building the test-base image (like `pip install -r requirements.txt`). This will speed up the total build time.
+
